@@ -26,3 +26,27 @@ print("main thread")
 heavy(1)
 print("end main thread")
 thr:join()
+
+local input = io.read()
+local t = switch(input) {
+    ["amrit"] = function ()
+        print("Woah!")
+        return "lua is based"
+    end,
+    ["frityet"] = "based"
+}
+
+print(t)
+
+local function comp(k)
+    if k == "amrit" or k == "frityet" then return true
+    else return false end
+end
+
+t = switch(comp) {
+    [input] = function ()
+        return "this is great!"
+    end
+}
+
+print(t)

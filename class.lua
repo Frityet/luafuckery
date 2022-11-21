@@ -3,6 +3,17 @@ local Object = {
     operators = {}
 }
 
+do
+    setmetatable(Object.operators, {
+        __newindex = function (self, key, value)
+            rawset(self, "__"..key, value)
+        end,
+        __index = function (self, key)
+            return rawget(self, "__"..key)
+        end
+    })
+end
+
 ---@generic T
 ---@param data T?
 ---@return T

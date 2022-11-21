@@ -36,6 +36,15 @@ function FunctionExtensions:print()
     end
 end
 
+function FunctionExtensions:appendto(tbl)
+    local k, v = self()
+    while k and v do
+        tbl[k] = v
+
+        k, v = self()
+    end
+end
+
 
 debug.setmetatable(function () end, {
     __index = FunctionExtensions,

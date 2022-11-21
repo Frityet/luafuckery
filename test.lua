@@ -15,7 +15,7 @@ function MyType.operators:add(other)
     return MyType:create(self.value + other) 
 end
 
-function MyType.operators:tostring()  return tostring(self.value) end
+function MyType.operators:tostring() return tostring(self.value) end
 
 local obj = MyType:create(10)
 

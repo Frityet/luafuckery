@@ -19,7 +19,8 @@ end
 ---@return T
 function Object:create(data)
     local mt =  { __index = self }
-    for k, v in pairs(self.operators) do mt[k] = v end
+
+    pairs(self.operators):appendto(mt)
 
     return setmetatable(data or {}, mt)
 end

@@ -1,32 +1,37 @@
--- require("netrequire")
--- local pprint = require("https://raw.githubusercontent.com/jagt/pprint.lua/master/pprint.lua")
+local Object = require("class")
 
--- pprint.pprint {
---     test = "y s"
--- }
-
-require("switch")
-
-local input = io.read()
-local t = switch(input) {
-    ["amrit"] = function ()
-        print("Woah!")
-        return "lua is based"
-    end,
-    ["frityet"] = "based"
+local MyType = class {
+    name = "",
+    id = 0
 }
 
-print(t)
-
-local function comp(k)
-    if k == "amrit" or k == "frityet" then return true
-    else return false end
+function MyType:print()
+    print(self.name, self.id)
 end
 
-t = switch(comp) {
-    [input] = function ()
-        return "this is great!"
-    end
+local instance = MyType:create {
+    name = "bob",
+    id = 4
 }
 
-print(t)
+instance:print()
+
+local InheritedType = class(MyType) {
+    age = 0
+}
+
+function InheritedType:create(name, id, age)
+    return Object.create(InheritedType, {
+        name = name,
+        id = id,
+        age = age
+    })
+end
+
+function InheritedType:print()
+    print(self.name, self.id, self.age)
+end
+
+instance = InheritedType:create("george", 10, 100)
+
+instance:print()

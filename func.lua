@@ -1,5 +1,7 @@
 local lanes = require("lanes").configure()
 
+local oldipairs, oldpairs = _G.ipairs, _G.pairs
+
 local FunctionExtensions = {}
 
 function FunctionExtensions:async(...)
@@ -11,27 +13,27 @@ end
 ---@generic T
 ---@param tbl T[]
 ---@return fun(): integer, T
-local function ipairs(tbl)
+function ipairs(tbl)
     return coroutine.wrap(function ()
-        local p = _G.ipairs
-        for i, v in p(tbl) do coroutine.yield(i, v) end
-        return nil
+        for i, v in oldipairs(tbl) do coroutine.yield(i, v) end
     end)
 end
 
 ---@generic TKey, TValue
 ---@param tbl {TKey:TValue}
 ---@return fun(): TKey, TValue
-local function pairs(tbl)
+function pairs(tbl)
     return coroutine.wrap(function ()
-        local p = _G.pairs
-        for k, v in p(tbl) do coroutine.yield(k, v) end
-        return nil
+        for k, v in oldpairs(tbl) do coroutine.yield(k, v) end
     end)
 end
 
 function FunctionExtensions:print()
-    for k, v in self do print(k, v) end
+    local out = {self()}
+    while out[1] do
+        print(table.unpack(out))
+        out = {self()}
+    end
 end
 
 

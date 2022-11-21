@@ -2,6 +2,8 @@ require("import")
 
 import "func"
 import "netrequire"
+import "switch"
+import "range"
 
 from "module" import "myfunc" as "mod"
 
@@ -50,3 +52,12 @@ t = switch(comp) {
 }
 
 print(t)
+ 
+local sum = 0
+for i in (1):to(10) do sum = sum + i end
+
+io.write("Sum: ")
+sum:to(sum):print();
+
+
+(1):to(10):print()

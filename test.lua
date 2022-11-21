@@ -1,37 +1,22 @@
 local Object = require("class")
+require("func")
 
 local MyType = class {
-    name = "",
-    id = 0
+    value = 0
 }
 
-function MyType:print()
-    print(self.name, self.id)
-end
-
-local instance = MyType:create {
-    name = "bob",
-    id = 4
-}
-
-instance:print()
-
-local InheritedType = class(MyType) {
-    age = 0
-}
-
-function InheritedType:create(name, id, age)
-    return Object.create(InheritedType, {
-        name = name,
-        id = id,
-        age = age
+function MyType:create(val)
+    return Object.create(self, {
+        value = val
     })
 end
 
-function InheritedType:print()
-    print(self.name, self.id, self.age)
+function MyType.operators:__add(other)
+    return MyType:create(self.value + other) 
 end
 
-instance = InheritedType:create("george", 10, 100)
+function MyType.operators:__tostring()  return tostring(self.value) end
 
-instance:print()
+local obj = MyType:create(10)
+
+print(obj + 11)

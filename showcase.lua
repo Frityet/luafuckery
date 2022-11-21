@@ -5,7 +5,44 @@ import "netrequire"
 import "switch"
 import "range"
 
-from "module" import "myfunc" as "mod"
+from "module" import { "myfunc" } as "mod"
+from "class" import { "Object", "class" }
+
+local MyType = class {
+    name = "",
+    id = 0
+}
+
+function MyType:print()
+    print(self.name, self.id)
+end
+
+local instance = MyType:create {
+    name = "bob",
+    id = 4
+}
+
+instance:print()
+
+local InheritedType = class(MyType) {
+    age = 0
+}
+
+function InheritedType:create(name, id, age)
+    return Object.create(InheritedType, {
+        name = name,
+        id = id,
+        age = age
+    })
+end
+
+function InheritedType:print()
+    print(self.name, self.id, self.age)
+end
+
+instance = InheritedType:create("george", 10, 100)
+
+instance:print()
 
 local pprint = require("https://raw.githubusercontent.com/jagt/pprint.lua/master/pprint.lua").pprint
 
@@ -59,5 +96,5 @@ for i in (1):to(10) do sum = sum + i end
 io.write("Sum: ")
 sum:to(sum):print();
 
-
 (1):to(10):print()
+

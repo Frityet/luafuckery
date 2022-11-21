@@ -1,10 +1,17 @@
 ---@class Object
-local Object = {}
+local Object = {
+    operators = {}
+}
 
 ---@generic T
 ---@param data T?
 ---@return T
-function Object:create(data) return setmetatable(data or {}, { __index = self }) end
+function Object:create(data)
+    local mt =  { __index = self }
+    for k, v in pairs(self.operators) do mt[k] = v end
+
+    return setmetatable(data or {}, mt)
+end
 
 ---@generic T
 ---@param data T?

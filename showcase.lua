@@ -44,6 +44,26 @@ instance = InheritedType:create("george", 10, 100)
 
 instance:print()
 
+local Integer = class {
+    value = 0
+}
+
+function Integer:create(val)
+    return Object.create(self, {
+        value = val
+    })
+end
+
+function Integer.operators:add(other)
+    return Integer:create(self.value + other) 
+end
+
+function Integer.operators:tostring() return tostring(self.value) end
+
+local obj = Integer:create(10)
+
+print(obj + 11)
+
 local pprint = require("https://raw.githubusercontent.com/jagt/pprint.lua/master/pprint.lua").pprint
 
 pprint(mod.myfunc(10))

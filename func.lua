@@ -2,6 +2,9 @@ local lanes = require("lanes").configure()
 
 local oldipairs, oldpairs = _G.ipairs, _G.pairs
 
+local yield = coroutine.yield
+
+---@class function
 local FunctionExtensions = {}
 
 function FunctionExtensions:async(...)
@@ -15,7 +18,7 @@ end
 ---@return fun(): integer, T
 function ipairs(tbl)
     return coroutine.wrap(function ()
-        for i, v in oldipairs(tbl) do coroutine.yield(i, v) end
+        for i, v in oldipairs(tbl) do yield(i, v) end
     end)
 end
 
@@ -24,7 +27,7 @@ end
 ---@return fun(): TKey, TValue
 function pairs(tbl)
     return coroutine.wrap(function ()
-        for k, v in oldpairs(tbl) do coroutine.yield(k, v) end
+        for k, v in oldpairs(tbl) do yield(k, v) end
     end)
 end
 
@@ -32,16 +35,21 @@ function FunctionExtensions:enumerate()
     return coroutine.wrap(function ()
         local out = {self()}
         while out[1] do
-            coroutine.yield(out)
+            yield(out)
             out = {self()}
         end
     end)
 end
 
 
-function FunctionExtensions:print()
+---@param fmt string?
+function FunctionExtensions:print(fmt)
     for vals in self:enumerate() do
-        print(table.unpack(vals))
+        if fmt then 
+            print(string.format(fmt, table.unpack(vals)))
+        else
+            print(table.unpack(vals))
+        end
     end
 end
 
@@ -56,14 +64,52 @@ end
 
 ---@generic T
 ---@param self fun(): T
----@param fn fun(T)
----@return any[]
+---@param fn fun(T): any
+---@return async fun(): any[]
 local function pipe(self, fn)
+    return coroutine.wrap(function ()
+        for vals in self:enumerate() do yield(fn(table.unpack(vals))) end
+    end)
+end
+
+function FunctionExtensions:collect()
     local ret = {}
     for vals in self:enumerate() do
-        ret[#ret+1] = fn(table.unpack(vals))
+        if type(vals) == "table" then
+            if #vals == 1 then ret[#ret+1] = vals[1] end
+        else ret[#ret+1] = vals end
     end
     return ret
+end
+
+function FunctionExtensions:apply(arg)
+    return function (...) return self(arg, ...) end
+end
+
+function FunctionExtensions:ipairs()
+    return coroutine.wrap(function ()
+        local i = 1
+        for val in self:enumerate() do
+            if #val == 1 then yield(i, val[1])
+            else yield(i, val) end
+            i = i + 1
+        end
+    end)
+end
+
+---@generic T
+---@param fn T | fun(T): boolean
+function FunctionExtensions:find(fn)
+    return coroutine.wrap(function ()
+        for vals in self:enumerate() do
+            local i, v = vals[1], vals[2]
+
+            local found = false
+            if type(fn) == "function" then found = fn(v)
+            else found = fn == v end
+            if found then yield(i) end
+        end
+    end)
 end
 
 debug.setmetatable(function () end, {

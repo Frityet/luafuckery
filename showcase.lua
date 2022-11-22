@@ -115,3 +115,24 @@ sum:to(sum):print();
 
 (1):to(10):print()
 
+local tbl = {
+    "Hello, "
+}
+function tbl:run(msg)
+    print("start")
+    local start = os.time()
+    repeat until os.time() >= start + 1
+    print(self[1], msg)
+    local start = os.time()
+    repeat until os.time() >= start + 1
+    print("end")
+end
+
+tbl.run:apply(tbl):async("World!")
+
+local function double(v) return v * 2 end
+local function addpair(k, v) return k + v end
+
+local vals = ((1):to(10) | double):collect()
+ipairs(vals):print()
+

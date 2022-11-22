@@ -97,10 +97,7 @@ local t = switch(input) {
 
 print(t)
 
-local function comp(k)
-    if k == "amrit" or k == "frityet" then return true
-    else return false end
-end
+local function comp(k) return k == "frityet" or k == "amrit" end
 
 t = switch(comp) {
     [input] = function ()

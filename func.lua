@@ -28,26 +28,46 @@ function pairs(tbl)
     end)
 end
 
+function FunctionExtensions:enumerate()
+    return coroutine.wrap(function ()
+        local out = {self()}
+        while out[1] do
+            coroutine.yield(out)
+            out = {self()}
+        end
+    end)
+end
+
+
 function FunctionExtensions:print()
-    local out = {self()}
-    while out[1] do
-        print(table.unpack(out))
-        out = {self()}
+    for vals in self:enumerate() do
+        print(table.unpack(vals))
     end
 end
 
 function FunctionExtensions:appendto(tbl)
-    local k, v = self()
-    while k and v do
+    for vals in self:enumerate() do
+        local k, v = vals[1], vals[2]
         tbl[k] = v
-
-        k, v = self()
     end
+
     return tbl
 end
 
+---@generic T
+---@param self fun(): T
+---@param fn fun(T)
+---@return any[]
+local function pipe(self, fn)
+    local ret = {}
+    for vals in self:enumerate() do
+        ret[#ret+1] = fn(table.unpack(vals))
+    end
+    return ret
+end
 
 debug.setmetatable(function () end, {
     __index = FunctionExtensions,
-    __newindex = function (self, idx, val) if idx == "__thread" then debug.getmetatable(self).__index.__thread = val end end
+    __newindex = function (self, idx, val) if idx == "__thread" then debug.getmetatable(self).__index.__thread = val end end,
+    __bor = pipe
 })

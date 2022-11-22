@@ -17,7 +17,7 @@ function string:enumerate()
 end
 
 function str:__call()
-    local indexes = self:enumerate():find('$'):collect()
+    local indexes = self:enumerate():find(function (c) return c == '{' or c == '}' end):collect()
     local locals = {}
 
     local startp

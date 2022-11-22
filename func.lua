@@ -43,6 +43,7 @@ function FunctionExtensions:appendto(tbl)
 
         k, v = self()
     end
+    return tbl
 end
 
 

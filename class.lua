@@ -18,9 +18,7 @@ end
 ---@param data T?
 ---@return T
 function Object:create(data)
-    local mt =  { __index = self }
-
-    pairs(self.operators):appendto(mt)
+    local mt = pairs(self.operators):appendto { __index = self }
 
     return setmetatable(data or {}, mt)
 end

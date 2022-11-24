@@ -1,9 +1,7 @@
-require("fmt");
-require("func");
-require("range");
+local html = require("html")
 
-
-local str = "my string"
-local num = 43534
-local tbl = {}
-print(("{str}, {num}, {tbl}")())
+print(html(function (_ENV)
+    return body {
+        
+    }
+end))

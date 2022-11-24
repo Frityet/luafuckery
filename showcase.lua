@@ -134,7 +134,7 @@ tbl.run:apply(tbl):async("World!")
 local function double(v) return v * 2 end
 local function addpair(k, v) return k + v end
 
-local vals = ((1):to(10) | double):collect()
+local vals = (((1):to(100, 2) | double):ipairs() | addpair):collect()
 ipairs(vals):print()
 
 local str = "my string"

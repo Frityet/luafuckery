@@ -31,6 +31,12 @@ function pairs(tbl)
     end)
 end
 
+function FunctionExtensions:keys()
+    return coroutine.wrap(function()
+        for vals in self:enumerate() do yield((table.unpack(vals))) end
+    end)
+end
+
 function FunctionExtensions:enumerate()
     return coroutine.wrap(function ()
         local out = {self()}
@@ -72,12 +78,23 @@ local function pipe(self, fn)
     end)
 end
 
+---@generic T
+---@param self fun(): T
+---@param fn fun(T): any
+---@return async fun(): any[]
+local function select(self, fn)
+    return coroutine.wrap(function ()
+        for vals in self:enumerate() do
+            local ok = false
+            if type(vals) == "table" then ok = fn(tbl.unpack(vals)) end
+        end
+    end)
+end
+
 function FunctionExtensions:collect()
     local ret = {}
     for vals in self:enumerate() do
-        if type(vals) == "table" then
-            if #vals == 1 then ret[#ret+1] = vals[1] end
-        else ret[#ret+1] = vals end
+        if type(vals) == "table" and #vals == 1 then ret[#ret+1] = vals[1] else ret[#ret+1] = vals end
     end
     return ret
 end

@@ -1,7 +1,7 @@
-local html = require("html")
+local f = require("fmt")
 
-print(html(function (_ENV)
-    return body {
-        
-    }
-end))
+local str = ", World!"
+local i = 4
+local tbl = { hello = "world" }
+
+print(f"Hello{str}, num: {i}, table: {tbl}")

@@ -1,7 +1,6 @@
 require("func");
 
----@type string
-local str = getmetatable("")
+local pprint = require("pprint")
 
 local yield = coroutine.yield
 
@@ -16,7 +15,9 @@ function string:enumerate()
     end)
 end
 
-function str:__call()
+---@param self string
+---@return string
+return function (self)
     local indexes = self:enumerate():find(function (c) return c == '{' or c == '}' end):collect()
     local locals = {}
 
@@ -47,11 +48,12 @@ function str:__call()
     end
 
     local str = ""
-    
-    local j, k = 1, 1
+    local j, k = 0, 1
     for i = 1, #indexes, 2 do
         str = str..self:sub(j+1, indexes[i]-1)
-        str = str..tostring(vals[k])
+
+        local v = vals[k]
+        str = str..(type(v) == "table" and pprint.pformat(v) or tostring(v))
         j = indexes[i + 1]
         k = k + 1
     end

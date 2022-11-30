@@ -1,7 +1,5 @@
-local f = require("fmt")
+require("range")
 
-local str = ", World!"
-local i = 4
-local tbl = { hello = "world" }
-
-print(f"Hello{str}, num: {i}, table: {tbl}")
+for i in (1):to(100) do
+    print(i)
+end

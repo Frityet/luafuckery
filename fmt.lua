@@ -52,7 +52,8 @@ return function (self)
     for i = 1, #indexes, 2 do
         str = str..self:sub(j+1, indexes[i]-1)
 
-        local v = vals[k]
+        local v = vals[k] or _G[k]
+        if v == nil then error("Format argument \""..k.."\" not found!") end
         str = str..(type(v) == "table" and pprint.pformat(v) or tostring(v))
         j = indexes[i + 1]
         k = k + 1

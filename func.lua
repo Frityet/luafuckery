@@ -91,6 +91,18 @@ local function select(self, fn)
     end)
 end
 
+function FunctionExtensions:sum()
+    return coroutine.wrap(function ()
+        local sum
+        for val in self:enumerate() do
+            sum = sum == nil and sum or sum + val
+            yield(sum)
+        end
+
+        return sum
+    end)
+end
+
 function FunctionExtensions:collect()
     local ret = {}
     for vals in self:enumerate() do

@@ -1,41 +1,28 @@
----@class Object
-local Object = {
-    operators = {}
-}
-
-do
-    setmetatable(Object.operators, {
-        __newindex = function (self, key, value)
-            rawset(self, "__"..key, value)
-        end,
-        __index = function (self, key)
-            return rawget(self, "__"..key)
-        end
-    })
-end
+local f = require("fmt")
 
 ---@generic T
----@param data T?
----@return T
-function Object:create(data)
-    local mt = pairs(self.operators):appendto { __index = self }
+---@param ... T
+---@return T | fun(...: T): T
+function class(...)
+    local args = {...}
+    local obj = setmetatable({}, { __index = args[#args] })
 
-    return setmetatable(data or {}, mt)
-end
+    if #args > 1 then
+        for i, v in ipairs(args) do
+            local mt = getmetatable(v)
+            if not mt then error(f"Table {i} cannot be inherited from") end
 
----@generic T
----@param data T?
----@return T | fun(T?): T
-function class(data)
-    local old_mt = getmetatable(data)
-    if old_mt then
-        return function (data)
-            return setmetatable(data or {}, { __index = old_mt.__index })
+
         end
     end
 
-    data = setmetatable(data or {}, { __index = Object })
-    return setmetatable({}, { __index = data })
+
 end
 
-return Object
+local Object = class {
+
+}
+
+Object = class(Object, Object, Object) {
+
+}

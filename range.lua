@@ -1,5 +1,5 @@
 local Ranges = {}
-debug.setmetatable(0, { 
+debug.setmetatable(0, {
     __index = Ranges,
     __concat = function (self, rhs)
         if type(rhs) ~= "number" then error("Right hand side must be an integer") end

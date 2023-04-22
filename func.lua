@@ -51,7 +51,7 @@ end
 ---@param fmt string?
 function FunctionExtensions:print(fmt)
     for vals in self:enumerate() do
-        if fmt then 
+        if fmt then
             print(string.format(fmt, table.unpack(vals)))
         else
             print(table.unpack(vals))

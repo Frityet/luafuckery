@@ -1,5 +1,5 @@
-require("range")
+local f = require("fmt")
 
-for i in (1):to(100) do
-    print(i)
-end
+local a = 1
+
+print(f"2 = {a + 1}")

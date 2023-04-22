@@ -1,11 +1,29 @@
+-- Copyright (C) 2023 Amrit Bhogal
+--
+-- This file is part of luayue.
+--
+-- luayue is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+--
+-- luayue is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+--
+-- You should have received a copy of the GNU General Public License
+-- along with luayue.  If not, see <http://www.gnu.org/licenses/>.
+
+local unpack = unpack or table.unpack
 
 local lfs = require("lfs")
 
 local is_windows = package.config:sub(1, 1) == "\\"
 
 ---@class Path
+---@overload fun(path: string, ...: string): Path
 ---@operator div(string|Path): Path
----@operator call(string): Path
 ---@operator sub(number): Path
 local Path = {
     ---@type string[]
@@ -64,8 +82,6 @@ end
 ---@param type "directory"
 ---@return boolean | file*, string?
 function Path:create(type, mode)
-    if self:exists() then return false, "Path already exists" end
-
     if type == "directory" then return self:mkdir_p()
     elseif type == "file" then
         mode = mode or "w"
@@ -83,7 +99,7 @@ end
 ---@param path string | Path
 ---@return Path
 function Path:__div(path)
-    if type(path) == "table" then return Path.from(tostring(self), table.unpack(path.parts)) end
+    if type(path) == "table" then return Path.from(tostring(self), unpack(path.parts)) end
     --[[@cast path string]]
 
     local parts = {}
@@ -91,7 +107,7 @@ function Path:__div(path)
         table.insert(parts, part)
     end
 
-    return Path.from(tostring(self), table.unpack(parts))
+    return Path.from(tostring(self), unpack(parts))
 end
 
 ---Removes `n` parts from the end of the path
@@ -102,7 +118,35 @@ function Path:pop(n)
     for i = 1, #self.parts - n do
         table.insert(parts, self.parts[i])
     end
-    return Path.from(table.unpack(parts))
+    return Path.from(unpack(parts))
+end
+
+---@return fun(): Path?
+function Path:entries()
+    return coroutine.wrap(function ()
+        for entry in lfs.dir(tostring(self)) do
+            if entry ~= "." and entry ~= ".." then coroutine.yield(self/entry) end
+        end
+    end)
+end
+
+---@return string?, string?
+function Path:read_all()
+    local f, err = self:create("file", "r")
+    if not f then return nil, err end
+    --[[ @cast f file* ]]
+
+    local data = f:read("*a")
+    f:close()
+
+    return data
+end
+
+---@return string?
+function Path:extension()
+    local name = self.parts[#self.parts]
+    local i = name:find("%.")
+    if i then return name:sub(i + 1) end
 end
 
 ---@private
@@ -111,6 +155,12 @@ Path.__sub = Path.pop
 ---@private
 ---@return string
 function Path:__tostring() return table.concat(self.parts, is_windows and "\\" or "/") end
+
+function Path.temporary_directory()
+    local path = os.tmpname()
+    if is_windows then path = path:sub(1, -5) end
+    return Path(path)
+end
 
 setmetatable(Path, { __call = function(_, ...) return Path.from(...) end })
 Path.current_directory = Path(lfs.currentdir())

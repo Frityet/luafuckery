@@ -3,7 +3,7 @@
         "require":"require",
         "from" : "require",
         "import" : "require",
-        "as" : "_G"
+        "as" : "_G",
     },
     "runtime.path": [
         "?.lua",
@@ -11,5 +11,15 @@
         "/usr/local/share/lua/5.4/?.lua",
         "/usr/local/share/lua/5.4/?/init.lua"
     ],
-    "runtime.unicodeName": true
+    "runtime.unicodeName": true,
+    "workspace.library": [
+        "/usr/local/share/lua/5.4/",
+        "/usr/local/share/lua/5.1/",
+        "/usr/local/lib/lua/5.1/",
+        "/Users/frityet/Library/Application Support/Code/User/globalStorage/sumneko.lua/addonManager/addons/luafilesystem/module/library"
+    ],
+    "diagnostics.globals": [
+        "lfs"
+    ],
+    "workspace.checkThirdParty": false
 }

@@ -5,9 +5,23 @@ import "netrequire"
 import "switch"
 import "range"
 import "fmt"
+import "cmod"
+import "lambda"
 
 from "module" import { "myfunc" } as "mod"
 from "class" import { "Object", "class" }
+
+local add = cmod [[
+    int add(lua_State *lua)
+    {
+        int a = luaL_checkinteger(lua, 1);
+        int b = luaL_checkinteger(lua, 2);
+        lua_pushinteger(lua, a + b);
+        return 1;
+    }
+]] { export = { "add" }, }
+
+print(add(1, 2))
 
 local MyType = class {
     name = "",
@@ -56,7 +70,7 @@ function Integer:create(val)
 end
 
 function Integer.operators:add(other)
-    return Integer:create(self.value + other) 
+    return Integer:create(self.value + other)
 end
 
 function Integer.operators:tostring() return tostring(self.value) end
@@ -107,7 +121,7 @@ t = switch(comp) {
 }
 
 print(t)
- 
+
 local sum = 0
 for i in (1):to(10) do sum = sum + i end
 
@@ -139,6 +153,6 @@ ipairs(vals):print()
 
 local str = "my string"
 local num = 43534
-local tbl = {}
-print(("{str}, {num}, {tbl}")())
+local tbl = {};
+(lambda'arg -> print(f"my string: ${str..num}, ${tbl}, ${arg}")')(43)
 

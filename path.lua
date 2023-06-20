@@ -1,29 +1,12 @@
--- Copyright (C) 2023 Amrit Bhogal
---
--- This file is part of luayue.
---
--- luayue is free software: you can redistribute it and/or modify
--- it under the terms of the GNU General Public License as published by
--- the Free Software Foundation, either version 3 of the License, or
--- (at your option) any later version.
---
--- luayue is distributed in the hope that it will be useful,
--- but WITHOUT ANY WARRANTY; without even the implied warranty of
--- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
--- GNU General Public License for more details.
---
--- You should have received a copy of the GNU General Public License
--- along with luayue.  If not, see <http://www.gnu.org/licenses/>.
-
-local unpack = unpack or table.unpack
+local unpack = table.unpack or unpack
 
 local lfs = require("lfs")
 
-local is_windows = package.config:sub(1, 1) == "\\"
+local is_windows = package.config:sub(1, 1) == '\\'
 
 ---@class Path
 ---@overload fun(path: string, ...: string): Path
----@operator div(string|Path): Path
+---@operator div(unknown|string|Path): Path
 ---@operator sub(number): Path
 local Path = {
     ---@type string[]
@@ -44,7 +27,7 @@ function Path.from(path, ...)
     for part in path:gmatch("[^/\\]+") do
         table.insert(parts, part)
     end
-    for _, part in ipairs({...}) do
+    for _, part in ipairs {...} do
         table.insert(parts, part)
     end
     return setmetatable({ parts = parts }, Path)
@@ -81,7 +64,7 @@ end
 ---@overload fun(self: Path, type: "file", mode: openmode?): file*, string?
 ---@param type "directory"
 ---@return boolean | file*, string?
-function Path:create(type, mode)
+function Path:open(type, mode)
     if type == "directory" then return self:mkdir_p()
     elseif type == "file" then
         mode = mode or "w"
@@ -132,7 +115,7 @@ end
 
 ---@return string?, string?
 function Path:read_all()
-    local f, err = self:create("file", "r")
+    local f, err = self:open("file", "r")
     if not f then return nil, err end
     --[[ @cast f file* ]]
 
@@ -158,7 +141,7 @@ function Path:__tostring() return table.concat(self.parts, is_windows and "\\" o
 
 function Path.temporary_directory()
     local path = os.tmpname()
-    if is_windows then path = path:sub(1, -5) end
+    if is_windows then path = path:sub(1, -5) end -- remove ".tmp" extension
     return Path(path)
 end
 

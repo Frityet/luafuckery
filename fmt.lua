@@ -1,63 +1,39 @@
-require("func");
+local get_locals = require("locals")
 
-local pprint = require("pprint")
 
-local yield = coroutine.yield
-
----@return fun(): integer, string
-function string:enumerate()
-    return coroutine.wrap(function ()
-        local i = 1
-        repeat
-            yield(i, self:sub(i, i))
-            i = i + 1
-        until i > self:len()
-    end)
-end
-
----@param self string
+---@param str string
 ---@return string
-return function (self)
-    local indexes = self:enumerate():find(function (c) return c == '{' or c == '}' end):collect()
-    local locals = {}
+return function (str)
+    local locals = get_locals()
 
-    local startp
-    for i, v in ipairs(indexes) do
-        if not startp then
-            startp = v
-            goto skip
-        end
+    -- Combine the locals with the global env
+    local env = {}
+    for k, v in pairs(_G) do env[k] = v end
+    -- Locals after, so they can override globals.
+    for k, v in pairs(locals) do env[k] = v end
 
-        locals[#locals+1] = self:sub(startp + 1, v - 1)
-        startp = nil
-        ::skip::
+    -- In between ${} is a lua expression, and the result is inserted into the string.
+    -- so like ${hi} is a variable, and ${hi + 1} is a variable plus 1.
+    -- So return a string with all the variables in it.
+
+    ---@param str string
+    ---@return string
+    local function replace(str)
+        return (str:gsub("%${.-}", function(match)
+            local expr = match:sub(3, -2)
+            local ok, res = pcall(assert(load("return "..expr, "fmt", "t", env)))
+            if ok then return tostring(res)
+            else return match end
+        end))
     end
 
-    local vals = {}
-    for _, v in ipairs(locals) do
-        local j = 1
-        while true do
-            local ln, lv = debug.getlocal(2, j)
-            if not ln then break end
-            if ln == v then
-                vals[#vals+1] = lv
-                break
-            end
-            j = j + 1
-        end
+    ---@param str string
+    ---@return string
+    local function replace_all(str)
+        local new = replace(str)
+        if new == str then return new
+        else return replace_all(new) end
     end
 
-    local str = ""
-    local j, k = 0, 1
-    for i = 1, #indexes, 2 do
-        str = str..self:sub(j+1, indexes[i]-1)
-
-        local v = vals[k] or _G[k]
-        if v == nil then error("Format argument \""..k.."\" not found!") end
-        str = str..(type(v) == "table" and pprint.pformat(v) or tostring(v))
-        j = indexes[i + 1]
-        k = k + 1
-    end
-
-    return str
+    return replace_all(str)
 end
